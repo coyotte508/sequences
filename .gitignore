@@ -1,0 +1,9 @@
+*.user
+*.o
+*.png
+*histo.txt
+*list.txt
+*.py
+Makefile*
+*.eps
+*.pgf

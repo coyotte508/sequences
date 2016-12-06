@@ -1,9 +1,10 @@
 *.user
 *.o
 *.png
-*histo.txt
-*list.txt
+*histo*.txt
+*list*.txt
 *.py
 Makefile*
 *.eps
 *.pgf
+sequence

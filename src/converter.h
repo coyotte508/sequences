@@ -11,7 +11,7 @@
 class Converter
 {
 public:
-    Converter();
+    Converter(int clusters = 8, int fanals = 256);
 
     void setSubsequenceMaxSize(int size);
 
@@ -32,15 +32,17 @@ public:
     void fillDummyCliques(int n, int c, int l);
     Clique getDummyClique();
     Clique getRandomClique() const;
+    Clique getUsedClique() const;
     QList<Clique> getDummyCliques() const;
 private:
     QHash<QString, QList<int>> data;
     QHash<QList<int>, QString> rdata;
     QHash<QList<int>, QList<Clique>> rawdata;
 
-    QList<Clique> dummyCliques;
+    QList<Clique> dummyCliques, usedCliques;
     QList<Clique> m_Cliques;
     int subSeqSize = 0;
+    int clusters, fanals;
 };
 
 #endif // CONVERTER_H

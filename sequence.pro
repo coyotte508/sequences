@@ -9,16 +9,16 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-SOURCES += main.cpp \
-    cliquenetwork.cpp \
-    converter.cpp \
-    utils.cpp \
-    tournament.cpp \
-    cliquenetworkmanager.cpp
+SOURCES += src/main.cpp \
+    src/cliquenetwork.cpp \
+    src/converter.cpp \
+    src/utils.cpp \
+    src/tournament.cpp \
+    src/cliquenetworkmanager.cpp
 
 HEADERS += \
-    cliquenetwork.h \
-    converter.h \
-    utils.h \
-    tournament.h \
-    cliquenetworkmanager.h
+    src/cliquenetwork.h \
+    src/converter.h \
+    src/utils.h \
+    src/tournament.h \
+    src/cliquenetworkmanager.h

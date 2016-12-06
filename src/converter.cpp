@@ -1,9 +1,10 @@
+#include <cassert>
 #include <QList>
 #include <QDebug>
 #include "utils.h"
 #include "converter.h"
 
-Converter::Converter()
+Converter::Converter(int clusters, int fanals) : clusters(clusters), fanals(fanals)
 {
 
 }
@@ -79,13 +80,17 @@ void Converter::fillDummyCliques(int n, int c, int l)
 
 Clique Converter::getDummyClique()
 {
+    Clique clique;
+
     if (dummyCliques.empty()) {
-        auto clique =  randomClique(8,256);
+        clique =  randomClique(clusters,fanals);
         m_Cliques.push_back(clique);
-        return clique;
+    } else {
+        clique = dummyCliques.takeLast();
     }
 
-    return dummyCliques.takeLast();
+    usedCliques.push_back(clique);
+    return clique;
 }
 
 Clique Converter::getRandomClique() const
@@ -94,6 +99,14 @@ Clique Converter::getRandomClique() const
 
     return m_Cliques[f(e1)];
 }
+
+Clique Converter::getUsedClique() const
+{
+    std::uniform_int_distribution<> f(0,usedCliques.size()-1);
+
+    return usedCliques[f(e1)];
+}
+
 
 QList<Clique> Converter::getDummyCliques() const
 {
@@ -165,7 +178,10 @@ QString Converter::gen(int x) const
 
 int Converter::count() const
 {
-    return rdata.count() - dummyCliques.count();
+    int ret = rdata.count() - dummyCliques.count();
+    assert(ret == usedCliques.size());
+
+    return ret;
 }
 
 void Converter::list() const

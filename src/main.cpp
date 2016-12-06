@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QDebug>
 #include <cassert>
+#include <thread>
 #include "utils.h"
 #include "tournament.h"
 #include "converter.h"
@@ -10,7 +11,10 @@
 
 using namespace std;
 
-void learn();
+static const int networks = 2;
+static const int dummies = 2;
+
+void learn(int clusters, int fanals, int networks, int dummies);
 void decompose( const string &in);
 
 int main(int argc, char *argv[])
@@ -24,7 +28,15 @@ int main(int argc, char *argv[])
     getline(cin, x);
 
     if (x.empty()) {
-        learn();
+        thread t1(learn, 8, 256, 2, 2);
+        thread t2(learn, 8, 256, 2, 1);
+        thread t3(learn, 16, 256, 2, 0);
+        thread t4(learn, 8, 512, 2, 0);
+
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
     } else {
         decompose(x);
     }
@@ -33,10 +45,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void learn() {
+void learn(int clusters, int fanals, int networks, int dummies) {
     QFile in("words.txt");
-    QFile out("u-list.txt");
-    QFile histof("u-histo.txt");
+    QFile out(QString("u-list-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
+    QFile histof(QString("u-histo-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
 
     in.open(QIODevice::ReadOnly);
     out.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -61,16 +73,16 @@ void learn() {
     cout << database.size() << " words in the database" << endl;
 
     Tournament tour;
-    Converter convert;
+    Converter convert(clusters, fanals);
     CliqueNetwork nw;
 
     nw.init(8, 256);
-    tour.init(3, 8, 256);
+    tour.init(networks+dummies, 8, 256);
     convert.fillDummyCliques(10000, 8, 256);
-    convert.setSubsequenceMaxSize(2);
+    convert.setSubsequenceMaxSize(networks);
 
     /* While (1) */
-    for (int i = 0; i < 100000; i++) {
+    for (int i = 0; i < 2000; i++) {
         /* Histogram of cliques : size / number of words with that size */
         QMap<int, int> histo;
 
@@ -97,6 +109,7 @@ void learn() {
         }
 
         histof.write("\"" + QByteArray::number(convert.count()) + "\": " + debug(histo).toUtf8() + ", \n");
+        histof.write(maxword.toUtf8() + "\n");
         histof.flush();
 
         //learn basic cliques (letters)
@@ -118,12 +131,14 @@ void learn() {
 
         //Add most common sequences to cliques list
         for (auto &x : most) {
-            assert(x.length() == 2);
+            assert(x.length() == networks);
 
             /* Dummy cliques are used as disambiguation */
-            x.push_back(convert.getRandomClique());
+            for (int i = 0; i < dummies; i++) {
+                x.push_back(convert.getRandomClique());
+            }
 
-            assert(x.length() == 3);
+            assert(x.length() == networks + dummies);
             qDebug() << convert.word(x);
 
             auto clique = convert.getDummyClique();
@@ -156,33 +171,44 @@ void learn() {
         qDebug() << "Dummy cliques left: " << convert.getDummyCliques().size();
 
         //Test a clique is fine
-        {
-            Clique cl = newCliques.first();
-            QList<Clique> cls = convert.cliques(cl);
+        if (i%20 == 0) {
+            int success = 0;
+            for (int i = 0; i < 100; i++) {
+                Clique cl = convert.getUsedClique();
+                QList<Clique> cls = convert.cliques(cl);
 
-            assert(cls.size() == 3);
+                //Atomic unit
+                if (cls.empty()) {
+                    success++;
+                    continue;
+                }
 
-            CliqueNetworkManager mng;
-            mng.addNetwork(nw);
-            for (int i = 0; i < cls.size(); i++) {
-                mng.addNetwork(tour.network(i));
+                assert(cls.size() == networks + dummies);
+
+                CliqueNetworkManager mng;
+                mng.addNetwork(nw);
+                for (int i = 0; i < cls.size(); i++) {
+                    mng.addNetwork(tour.network(i));
+                }
+
+                mng.shutdown();
+                nw.activateClique(cl);
+                mng.iterate();
+
+                QList<Clique> res;
+                for (int i = 0; i < cls.size(); i++) {
+                    res.push_back(tour.network(i).activatedClique());
+                }
+
+                if (convert.word(res) == convert.word(cls)) {
+                    cout << "Test successful: " << convert.word(cl).toStdString() << " to " << convert.word(res,true).toStdString() << endl;
+                    success++;
+                } else {
+                    cout << "Test failed: " << convert.word(cl).toStdString() << " to " << convert.word(res,true).toStdString() << endl;
+                }
             }
-
-            mng.shutdown();
-            nw.activateClique(cl);
-            mng.iterate();
-
-            QList<Clique> res;
-            for (int i = 0; i < cls.size(); i++) {
-                res.push_back(tour.network(i).activatedClique());
-            }
-
-            if (convert.word(res) == convert.word(cls)) {
-                cout << "Test successful: " << convert.word(cl).toStdString() << " to " << convert.word(res,true).toStdString() << endl;
-            } else {
-                cout << "Test failed: " << convert.word(cl).toStdString() << " to " << convert.word(res,true).toStdString() << endl;
-                return;
-            }
+            cout << "Success: " << success << "/100" << endl;
+            histof.write(QString("Succes rate: %1/100\n").arg(success).toUtf8());
         }
     }
 }

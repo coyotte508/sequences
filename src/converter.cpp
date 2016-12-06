@@ -16,7 +16,6 @@ void Converter::setSubsequenceMaxSize(int size)
 
 QList<QList<int>> Converter::cliques() const
 {
-    //data.values() doesn't contain dummy cliques
     return m_Cliques;
 }
 

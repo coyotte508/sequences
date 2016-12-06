@@ -30,13 +30,15 @@ int main(int argc, char *argv[])
     if (x.empty()) {
         thread t1(learn, 8, 256, 2, 2);
         thread t2(learn, 8, 256, 2, 1);
-        thread t3(learn, 16, 256, 2, 0);
-        thread t4(learn, 8, 512, 2, 0);
+        thread t3(learn, 8, 256, 2, 0);
+        thread t4(learn, 16, 256, 2, 0);
+        thread t5(learn, 8, 512, 2, 0);
 
         t1.join();
         t2.join();
         t3.join();
         t4.join();
+        t5.join();
     } else {
         decompose(x);
     }
@@ -76,13 +78,13 @@ void learn(int clusters, int fanals, int networks, int dummies) {
     Converter convert(clusters, fanals);
     CliqueNetwork nw;
 
-    nw.init(8, 256);
-    tour.init(networks+dummies, 8, 256);
-    convert.fillDummyCliques(10000, 8, 256);
+    nw.init(clusters, fanals);
+    tour.init(networks+dummies, clusters, fanals);
+    convert.fillDummyCliques(10000, clusters, fanals);
     convert.setSubsequenceMaxSize(networks);
 
     /* While (1) */
-    for (int i = 0; i < 2000; i++) {
+    for (int i = 0; i < 10000; i++) {
         /* Histogram of cliques : size / number of words with that size */
         QMap<int, int> histo;
 
@@ -120,12 +122,21 @@ void learn(int clusters, int fanals, int networks, int dummies) {
             for (const auto &cl: cliques) {
                 tour.learnClique(cl);
                 nw.addClique(cl);
-                out.write(convert.word(cl).toUtf8() + "\n");
+
+                QString word = convert.word(cl);
+                if (!word.isEmpty()) {
+                    out.write(word.toUtf8() + "\n");
+                }
             }
         }
 
         //10 most common sequences
         auto most = tour.topSequences(10); tour.clearCache();
+
+        if (most.isEmpty()) {
+            out.write("finished!!\n");
+            return;
+        }
 
         QList<Clique> newCliques;
 

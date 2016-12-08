@@ -50,11 +50,13 @@ int main(int argc, char *argv[])
 void learn(int clusters, int fanals, int networks, int dummies) {
     QFile in("words.txt");
     QFile out(QString("u-list-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
+    QFile errors(QString("u-errors-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
     QFile histof(QString("u-histo-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
 
     in.open(QIODevice::ReadOnly);
     out.open(QIODevice::WriteOnly | QIODevice::Text);
     histof.open(QIODevice::WriteOnly | QIODevice::Text);
+    errors.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QList<QByteArray> _database = in.readAll().split('\n');
     QList<QString> database;
@@ -182,9 +184,10 @@ void learn(int clusters, int fanals, int networks, int dummies) {
         qDebug() << "Dummy cliques left: " << convert.getDummyCliques().size();
 
         //Test a clique is fine
-        if (i%20 == 0) {
+        if (i%25 == 0) {
             int success = 0;
-            for (int i = 0; i < 100; i++) {
+            const int nbtests = 2000;
+            for (int i = 0; i < nbtests; i++) {
                 Clique cl = convert.getUsedClique();
                 QList<Clique> cls = convert.cliques(cl);
 
@@ -218,8 +221,14 @@ void learn(int clusters, int fanals, int networks, int dummies) {
                     cout << "Test failed: " << convert.word(cl).toStdString() << " to " << convert.word(res,true).toStdString() << endl;
                 }
             }
-            cout << "Success: " << success << "/100" << endl;
-            histof.write(QString("Succes rate: %1/100\n").arg(success).toUtf8());
+            cout << "Success: " << success << "/2000" << endl;
+            histof.write(QString("Succes rate: %1/2000 (%2)\n").arg(success).arg(float(success)/nbtests).toUtf8());
+            histof.flush();
+            if (i != 0) {
+                errors.write(",");
+            }
+            errors.write(QByteArray::number(success));
+            errors.flush();
         }
     }
 }

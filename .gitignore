@@ -8,3 +8,8 @@ Makefile*
 *.eps
 *.pgf
 sequence
+node_modules
+data
+bower_components
+public
+

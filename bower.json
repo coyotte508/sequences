@@ -1,0 +1,21 @@
+{
+  "name": "sequence",
+  "description": "Recursive compressed learning",
+  "main": "monitor.js",
+  "authors": [
+    "coyotte508 <coyotte508@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/coyotte508/sequences",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6"
+  }
+}

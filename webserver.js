@@ -55,9 +55,12 @@ seq.stdout.on('data', (data) => {
     resetChunks();
   }
   if (chunks.trim().endsWith(")")) {
-    chunks = chunks.split("\n").pop().trim();
+    console.log("decomposed");
+    chunks = chunks.trim().split("\n").pop().trim();
+    console.log(chunks);
     config.decomposed = chunks.substr(0, chunks.lastIndexOf(" "));
     resetChunks();
+    console.log(config);
   }
 });
 
@@ -82,7 +85,7 @@ app.post("/", function(req, res) {
   console.log(JSON.stringify(req.body));
 
   co(function*() {
-    var num = Number((req.body["number-seq"]).trim());
+    var num = Number(req.body["number-seq"].trim());
     assert(Number.isInteger(num) && num > 0 && num < 60000, "The number provided must be an integer between 1 and 50000");
 
     yield exec(num);
@@ -95,5 +98,20 @@ app.post("/", function(req, res) {
     console.log("sending back error", err);
     res.status(500);
     res.render('index', {config, error: err.message});
+  });
+});
+
+app.post("/decompose", function(req, res) {
+  console.log(JSON.stringify(req.body));
+
+  co(function*() {
+    var seq = req.body["sequence"].trim();
+    
+    if (seq.length == 0) {
+      config.decomposed = "";
+    } else {
+      yield exec(seq);
+    }
+    res.send(config.decomposed).end();
   });
 });

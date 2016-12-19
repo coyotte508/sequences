@@ -44,6 +44,63 @@
       </div>
       <% } %>
 
+      <div class="col-md-8">
+        <div class = "panel panel-default">
+          <div class = "panel-heading">
+            <h2 class= "panel-title">Learn sequences</h2>
+          </div>
+          <div class = "panel-body">
+            <form class="form-inline" method="post">
+              <div class="form-group">
+                <label for="number-seq">Number of sequences to learn</label>
+                <input type="text" class="form-control" id="number-seq" placeholder="5000" value="<%- config.number %>">
+              </div>
+              <input type="hidden" name="action" value="learn">
+              <button type="submit" class="btn btn-primary">Learn!</button>
+            </form>
+          </div>
+        </div>
+        <div class = "panel panel-default">
+          <div class = "panel-heading">
+            <h2 class= "panel-title">Word / Group of words to decompose</h2>
+          </div>
+          <div class = "panel-body">
+            <p class="lead" contenteditable="true" placeholder="Input the words here..."></p>
+          </div>
+        </div>
+        <div class = "panel panel-default">
+          <div class = "panel-heading">
+            <h2 class= "panel-title">Preprocessed sequence</h2>
+          </div>
+          <div class = "panel-body">
+            <p class="lead" defaultvalue="inputthewordshere"></p>
+          </div>
+        </div>
+        <div class = "panel panel-default">
+          <div class = "panel-heading">
+            <h2 class= "panel-title">Decomposed sequence</h2>
+          </div>
+          <div class = "panel-body">
+            <p class="lead"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class = "panel panel-default">
+          <div class = "panel-heading">
+            <h2 class= "panel-title">Last sequences learned</h2>
+          </div>
+          <div class = "panel-body">
+            <ul class="list-group">
+            <% for(var i=0; i < config.lastWords.length; i++) { %>
+               <li class="list-group-item"><%- config.lastWords[i] %></li>
+            <% } %>
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /.container -->
 
     <script src="/assets/javascript/jquery.min.js"></script>

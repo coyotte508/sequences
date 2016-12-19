@@ -7,3 +7,17 @@ body {
   padding: 40px 15px;
   text-align: center;
 }
+
+[contenteditable=true]:empty:before {
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+  opacity: 0.8;
+  font-style: italic;
+}
+
+[defaultvalue]:empty:before {
+  content: attr(defaultvalue);
+  display: block; /* For Firefox */
+  opacity: 0.8;
+  font-style: italic;
+}

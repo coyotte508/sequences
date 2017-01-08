@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
 
 void learn(int clusters, int fanals, int networks, int dummies) {
     QFile in("words.txt");
-    QFile out(QString("u-list-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
-    QFile errors(QString("u-errors-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
-    QFile histof(QString("u-histo-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
+    QFile out(QString("u-full-list-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
+    QFile errors(QString("u-full-errors-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
+    QFile histof(QString("u-full-histo-%1-%2-%3-%4.txt").arg(clusters).arg(fanals).arg(networks).arg(dummies));
 
     in.open(QIODevice::ReadOnly);
     out.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -63,14 +63,11 @@ void learn(int clusters, int fanals, int networks, int dummies) {
 
     for (const auto &b : _database) {
         if (!b.contains('\'')) {
-            for (int x : b) {
-                if (x < 'a' || x > 'z') {
-                    goto end;
-                }
+            QString s = QString::fromUtf8(b);
+            if (s[0].isUpper()) {
+                continue;
             }
-            database.push_back(QString::fromUtf8(b));
-            end:
-            ;
+            database.push_back(s);
         }
     }
 

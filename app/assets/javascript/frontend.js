@@ -19,7 +19,7 @@ $(function() {
     lastStripped = stripped;
     $.post("/decompose", {"sequence": stripped}, function(data) {
       console.log(arguments);
-      $("#decomposed").text(data);
+      $("#decomposed").text(data.replace(/\|/g, "-"));
     });
    });
 });
